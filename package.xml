@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>omnibot_driver</name>
+  <version>0.0.1</version>
+  <description>Driver for Toyota Jura trucks</description>
+
+  <maintainer email="samuel@dynorobotics.se">Samuel Lindgren</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">dynorobotics.se</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>can_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>controller_manager</depend>
+
+  <test_depend>roslint</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
+</package>

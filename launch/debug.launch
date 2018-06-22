@@ -1,0 +1,7 @@
+<launch>
+  <!-- Driver -->
+  <node name="debug_node" pkg="omnibot_driver" type="debug_node"/>
+  
+  <!-- Controller -->
+  <include file="$(find dyno_control)/launch/mecanum_controllers.launch"/>
+</launch>
