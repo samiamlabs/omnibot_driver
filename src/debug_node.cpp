@@ -23,9 +23,16 @@ int main(int argc, char **argv)
   ros::Rate rate(1.0 / robot.getPeriod().toSec());
   // ros::Rate rate(0.1);
   ROS_ERROR("init debug...");
-  
+
+  ros::Publisher front_right_cmd_pub = nh.advertise<std_msgs::Float64>("front_right_cmd", 1);
+  ros::Publisher front_left_cmd_pub = nh.advertise<std_msgs::Float64>("front_left_cmd", 1);
+  ros::Publisher rear_right_cmd_pub = nh.advertise<std_msgs::Float64>("rear_right_cmd", 1);
+  ros::Publisher rear_left_cmd_pub = nh.advertise<std_msgs::Float64>("rear_left_cmd", 1);
+
   ros::AsyncSpinner spinner(1);
   spinner.start();
+
+  std_msgs::Float64 msg;
 
   while(ros::ok())
   {
@@ -34,6 +41,16 @@ int main(int argc, char **argv)
     robot.read();
     cm.update(robot.getTime(), robot.getPeriod());
     robot.write();
+
+    // Publish on ros topic
+    msg.data = robot.getFrontRightCmd();
+    front_right_cmd_pub.publish(msg);
+    msg.data = robot.getFrontLeftCmd();
+    front_left_cmd_pub.publish(msg);
+    msg.data = robot.getRearRightCmd();
+    rear_right_cmd_pub.publish(msg);
+    msg.data = robot.getRearLeftCmd();
+    rear_left_cmd_pub.publish(msg);
 
     rate.sleep();
   }
