@@ -146,7 +146,21 @@ void Omnibot::registerJointLimits() {
 }
 
 void Omnibot::read() {
-  // ROS_ERROR("read");
+  bool open_loop_ = true;
+
+  if(open_loop_) {
+    front_left_vel_ = lowpass_front_left_cmd_;
+    front_right_vel_ = lowpass_front_right_cmd_;
+    rear_left_vel_ = lowpass_rear_left_cmd_;
+    rear_right_vel_ = lowpass_rear_right_cmd_;
+  } else {
+    //TODO: get vel from ecoders
+  }
+
+  front_left_pos_ += front_left_vel_*getPeriod().toSec();
+  front_right_pos_ += front_right_vel_*getPeriod().toSec();
+  rear_left_pos_ += rear_left_vel_*getPeriod().toSec();
+  rear_right_pos_ += rear_right_vel_*getPeriod().toSec();
 }
 
 void Omnibot::write() {
@@ -155,45 +169,63 @@ void Omnibot::write() {
   if(use_lowpass_){
     lowPassJoints();
   } else {
-    lowpass_front_right_cmd_ = front_right_cmd_;
     lowpass_front_left_cmd_ = front_left_cmd_;
-    lowpass_rear_right_cmd_ = rear_right_cmd_;
+    lowpass_front_right_cmd_ = front_right_cmd_;
     lowpass_rear_left_cmd_ = rear_left_cmd_;
+    lowpass_rear_right_cmd_ = rear_right_cmd_;
   }
 }
 
 void Omnibot::lowPassJoints() {
-  lowpass_front_right_cmd_ = lowPassFilter(
-    front_right_cmd_,
-    last_front_right_cmd_,
-    getPeriod().toSec(),
-    lowpass_constant_
-  );
-  last_front_right_cmd_ = lowpass_front_right_cmd_;
+  double min_vel_ = 0.001;
 
-  lowpass_front_left_cmd_ = lowPassFilter(
-    front_left_cmd_,
-    last_front_left_cmd_,
-    getPeriod().toSec(),
-    lowpass_constant_
-  );
+  if(fabs(front_left_cmd_) > min_vel_) {
+    lowpass_front_left_cmd_ = lowPassFilter(
+      front_left_cmd_,
+      last_front_left_cmd_,
+      getPeriod().toSec(),
+      lowpass_constant_
+    );
+  } else {
+    lowpass_front_left_cmd_ = 0.0;
+  }
   last_front_left_cmd_ = lowpass_front_left_cmd_;
 
-  lowpass_rear_right_cmd_ = lowPassFilter(
-    rear_right_cmd_,
-    last_rear_right_cmd_,
-    getPeriod().toSec(),
-    lowpass_constant_
-  );
-  last_rear_right_cmd_ = lowpass_rear_right_cmd_;
+  if(fabs(front_right_cmd_) > min_vel_) {
+    lowpass_front_right_cmd_ = lowPassFilter(
+      front_right_cmd_,
+      last_front_right_cmd_,
+      getPeriod().toSec(),
+      lowpass_constant_
+    );
+  } else {
+    lowpass_front_right_cmd_ = 0.0;
+  }
+  last_front_right_cmd_ = lowpass_front_right_cmd_;
 
-  lowpass_rear_left_cmd_ = lowPassFilter(
-    rear_left_cmd_,
-    last_rear_left_cmd_,
-    getPeriod().toSec(),
-    lowpass_constant_
-  );
+  if(fabs(rear_left_cmd_) > min_vel_) {
+    lowpass_rear_left_cmd_ = lowPassFilter(
+      rear_left_cmd_,
+      last_rear_left_cmd_,
+      getPeriod().toSec(),
+      lowpass_constant_
+    );
+  } else {
+    lowpass_rear_left_cmd_ = 0.0;
+  }
   last_rear_left_cmd_ = lowpass_rear_left_cmd_;
+
+  if(fabs(rear_right_cmd_) > min_vel_) {
+    lowpass_rear_right_cmd_ = lowPassFilter(
+      rear_right_cmd_,
+      last_rear_right_cmd_,
+      getPeriod().toSec(),
+      lowpass_constant_
+    );
+  } else {
+    lowpass_rear_right_cmd_ = 0.0;
+  }
+  last_rear_right_cmd_ = lowpass_rear_right_cmd_;
 }
 
 double Omnibot::lowPassFilter(double x, double y0, double dt, double T)
