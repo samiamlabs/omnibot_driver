@@ -174,6 +174,8 @@ void Omnibot::write() {
     lowpass_rear_left_cmd_ = rear_left_cmd_;
     lowpass_rear_right_cmd_ = rear_right_cmd_;
   }
+
+  //TODO: send wheel rotational velocities to arduino
 }
 
 void Omnibot::lowPassJoints() {
