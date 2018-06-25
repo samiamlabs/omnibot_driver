@@ -8,8 +8,9 @@ find_package(catkin REQUIRED
 )
 
 catkin_package(
-  INCLUDE_DIRS
-    include
+# Gives compile error because empty include folder is not checked into git.
+#  INCLUDE_DIRS
+#    include
   LIBRARIES
     omnibot_driver
   CATKIN_DEPENDS
