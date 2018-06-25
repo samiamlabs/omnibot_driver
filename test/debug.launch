@@ -23,6 +23,9 @@
   <!--
   <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/>
    -->
+  <arg name="joy_type" default="ps4"/>
   <remap from="cmd_vel" to="/mobile_base_controller/cmd_vel"/>
-  <include file="$(find dyno_teleop)/launch/ps4.launch"/>
+  <include file="$(find dyno_teleop)/launch/joy.launch">
+    <arg name="type" value="$(arg joy_type)"/>
+  </include>
 </launch>
