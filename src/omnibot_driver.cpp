@@ -1,5 +1,5 @@
 #include "omnibot_driver.h"
-#include "serial/serial.h"
+#include <serial/serial.h>
 #include <vector>
 
 namespace omnibot_driver {

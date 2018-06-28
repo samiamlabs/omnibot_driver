@@ -5,6 +5,7 @@ find_package(catkin REQUIRED
   COMPONENTS
     roscpp
     controller_manager
+    serial
 )
 
 catkin_package(
