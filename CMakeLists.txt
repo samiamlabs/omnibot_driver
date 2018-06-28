@@ -16,6 +16,7 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp
     controller_manager
+    serial
 )
 
 include_directories(
@@ -26,7 +27,9 @@ include_directories(
 
 add_executable(debug_node
   src/debug_node.cpp
+  src/omnibot_driver.cpp
 )
+
 target_link_libraries(debug_node
   ${catkin_LIBRARIES}
 )

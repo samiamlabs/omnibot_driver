@@ -7,7 +7,7 @@
 #include <string.h>
 #include <controller_manager/controller_manager.h>
 
-#include "omnibot_driver.cpp"
+#include "omnibot_driver.h"
 
 
 int main(int argc, char **argv)
