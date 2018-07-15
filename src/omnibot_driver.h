@@ -11,8 +11,13 @@
 #include <joint_limits_interface/joint_limits_rosparam.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 
+#include "CmdMessenger.h"
+
 namespace omnibot_driver
 {
+  enum Command {
+    CMD_STEER = 0
+  };
 
 class Omnibot : public hardware_interface::RobotHW
 {
@@ -54,6 +59,9 @@ private:
   double last_front_left_cmd_, lowpass_front_left_cmd_;
   double last_rear_right_cmd_, lowpass_rear_right_cmd_;
   double last_rear_left_cmd_, lowpass_rear_left_cmd_;
+
+  serial::Serial serial_;
+  CmdMessenger cmd_messenger_;
 };
 
 };

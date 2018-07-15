@@ -1,0 +1,19 @@
+<launch>
+
+  <!-- Gui -->
+  <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui"/>
+
+  <!-- Plot -->
+  <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"/>
+
+  <!-- Teleop -->
+  <!--
+  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/>
+   -->
+  <arg name="joy_type" default="ps4"/>
+  <remap from="cmd_vel" to="/mobile_base_controller/cmd_vel"/>
+  <include file="$(find dyno_teleop)/launch/joy.launch">
+    <arg name="type" value="$(arg joy_type)"/>
+  </include>
+  
+</launch>

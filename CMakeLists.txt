@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(omnibot_driver)
 
+add_compile_options(-std=c++11)
+
 find_package(catkin REQUIRED
   COMPONENTS
     roscpp
     controller_manager
+    serial
 )
 
 catkin_package(
@@ -28,6 +31,7 @@ include_directories(
 add_executable(debug_node
   src/debug_node.cpp
   src/omnibot_driver.cpp
+  src/CmdMessenger.cpp
 )
 
 target_link_libraries(debug_node

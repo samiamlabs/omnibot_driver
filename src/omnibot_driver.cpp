@@ -1,23 +1,6 @@
 #include "omnibot_driver.h"
-#include "serial/serial.h"
-#include <vector>
 
 namespace omnibot_driver {
-
-  void enumerate_ports()
-  {
-  	std::vector<serial::PortInfo> devices_found = serial::list_ports();
-
-  	std::vector<serial::PortInfo>::iterator iter = devices_found.begin();
-
-  	while( iter != devices_found.end() )
-  	{
-  		serial::PortInfo device = *iter++;
-
-  		printf( "(%s, %s, %s)\n", device.port.c_str(), device.description.c_str(),
-       device.hardware_id.c_str() );
-  	}
-  }
 
 Omnibot::Omnibot()
     :
@@ -46,15 +29,17 @@ Omnibot::Omnibot()
     lowpass_front_right_cmd_(0),
     lowpass_front_left_cmd_(0),
     lowpass_rear_right_cmd_(0),
-    lowpass_rear_left_cmd_(0)
+    lowpass_rear_left_cmd_(0),
+    serial_("/dev/ttyUSB0", 9600, serial::Timeout::simpleTimeout(1000)),
+    cmd_messenger_(serial_)
 {
-  ROS_ERROR("driver init");
-
   registerJoints();
   registerJointLimits();
 
   registerInterface(&joint_state_interface_);
   registerInterface(&joint_vel_interface_);
+
+  ROS_ERROR("Serial open: %d", serial_.isOpen());
 }
 
 void Omnibot::registerJoints() {
@@ -165,6 +150,18 @@ void Omnibot::registerJointLimits() {
 void Omnibot::read() {
   bool open_loop_ = true;
 
+  try {
+    cmd_messenger_.feedinSerialData();
+  } catch(serial::SerialException e) {
+    ROS_ERROR_STREAM("cmd_messenger_.feedinSerialData() threw an exception:\n" << e.what());
+  }
+
+  while (serial_.available()) {
+    uint8_t buffer[2];
+    serial_.read(buffer, 2);
+    ROS_ERROR_STREAM(buffer[0] << "" << buffer[1]);
+  }
+
   if(open_loop_) {
     front_left_vel_ = lowpass_front_left_cmd_;
     front_right_vel_ = lowpass_front_right_cmd_;
@@ -192,7 +189,23 @@ void Omnibot::write() {
     lowpass_rear_right_cmd_ = rear_right_cmd_;
   }
 
+  // Convert to thousands of a revolution / second.
+  int16_t m[] = {
+    (int16_t)(lowpass_front_right_cmd_ * 1000 / (2*M_PI)),
+    (int16_t)(lowpass_rear_right_cmd_ * 1000 / (2*M_PI)),
+    (int16_t)(lowpass_front_left_cmd_ * 1000 / (2*M_PI)),
+    (int16_t)(lowpass_rear_left_cmd_ * 1000 / (2*M_PI))
+  };
+
+  //ROS_ERROR_STREAM("m: " << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3]);
+
   //TODO: send wheel rotational velocities to arduino
+  cmd_messenger_.sendCmdStart(1);
+  cmd_messenger_.sendCmdBinArg(m[0]);
+  cmd_messenger_.sendCmdBinArg(m[1]);
+  cmd_messenger_.sendCmdBinArg(m[2]);
+  cmd_messenger_.sendCmdBinArg(m[3]);
+  cmd_messenger_.sendCmdEnd();
 }
 
 void Omnibot::lowPassJoints() {

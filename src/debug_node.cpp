@@ -9,9 +9,24 @@
 
 #include "omnibot_driver.h"
 
+#include "serial/serial.h"
+#include <vector>
+
+void enumerate_ports()
+{
+  ROS_ERROR("::::::::::: ENUMERATE PORTS :::::::::::");
+  std::vector<serial::PortInfo> devices_found = serial::list_ports();
+
+  for (serial::PortInfo& info : devices_found)
+  {
+    ROS_ERROR("(%s, %s, %s)", info.port.c_str(), info.description.c_str(), info.hardware_id.c_str());
+  }
+}
 
 int main(int argc, char **argv)
 {
+  enumerate_ports();
+
   ros::init(argc, argv, "tricycle_driver");
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
@@ -21,8 +36,6 @@ int main(int argc, char **argv)
   controller_manager::ControllerManager cm(&robot, nh);
 
   ros::Rate rate(1.0 / robot.getPeriod().toSec());
-  // ros::Rate rate(0.1);
-  ROS_ERROR("init debug...");
 
   ros::Publisher front_right_cmd_pub = nh.advertise<std_msgs::Float64>("front_right_cmd", 1);
   ros::Publisher front_left_cmd_pub = nh.advertise<std_msgs::Float64>("front_left_cmd", 1);
@@ -36,8 +49,6 @@ int main(int argc, char **argv)
 
   while(ros::ok())
   {
-    // ROS_ERROR("debug loop...");
-
     robot.read();
     cm.update(robot.getTime(), robot.getPeriod());
     robot.write();
